@@ -71,6 +71,41 @@ sim.ctmc<-function(start.state,rate.matrix, end.time,start.time=0,absorbing.stat
   return(return.list)
 }
 
+discrete.ctmc<-function(ctmc.times,ctmc.states,obs.times){
+  ###################################################################################################
+  #Author: Jl 2-7-2011
+  # This function gets the state of a CTMC at different discrete observation times
+  #INPUTS: ctmc.times=the transition times for the CTMC
+  #        ctmc.states=the states at each of the transition times
+  #        obs.times = the discrete observation times
+  #
+  #OUTPUTS: a dataframe with two columns: obs.times= observation times, states=value of state at obs.times
+  #WARNING: if the observation times are outside of max and min transition time, then
+  #         the state is assumed to be unchanged from the closest recorded transition time
+  #################################################################################################
+  out<- data.frame(approx(x=ctmc.times,y=ctmc.states,xout=obs.times,rule=2,f=0,method="constant"))
+  colnames(out)<-c("obs.times","states")
+  return(out)
+}
+
+get.observed.datapoint<-function(underlying.state,emission.matrix){
+  ###################################################################################################
+  #Author: Jl 2-7-2011
+  # This function gets an observed data point in a HMM based on an underlying state an emission matrix
+  #INPUTS: underlying.state = unobserved underlying state in HMM,
+  #        emmision.matrix=a matrix with the emission probablities.
+  #        the ith row corresponds to the hidden value X(t)=i, and the kth column to O(t)=k|X(t)=i
+  #        thus the rows sum to 1, and k columns correspond to the k possible observed states
+  #OUTPUTS: the observed data point
+  #################################################################################################
+  states<-seq(1:dim(emission.matrix)[2])
+  probs<-emission.matrix[underlying.state,]
+  # browser()
+  sample(x=states,size=1,prob=probs)
+}
+
+
+
 process_data<-function(simdata){
   temp1=head(cbind(simdata$states, simdata$states[-1]),-1)
   temp2=head(cbind(simdata$obs.times,simdata$obs.times[-1]),-1)
