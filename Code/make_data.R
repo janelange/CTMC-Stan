@@ -1,4 +1,5 @@
 setwd("/Users/jlange/Documents/Stan/Stan/CTMC-Stan/Code")
+setwd("/Users/janelange/Documents/Work/Stan/Code/")
 source("simulatedata.R")
 
 rate_mat=matrix(0,nrow=5,ncol=5)

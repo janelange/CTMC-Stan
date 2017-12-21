@@ -5,13 +5,14 @@ library(ggmcmc)
 mcode <- '
 functions{
 //write the custom function
-real transprob_lpmf(int endstate, real starttime,real endtime, int startstate, int n_states, matrix lambda){
+real transprob_log(int endstate, real starttime,real endtime, int startstate, int n_states, matrix lambda){
   real dur;
   real loglike;
   matrix[n_states,n_states] probmat;
   dur=endtime-starttime;
   probmat=matrix_exp(lambda*dur);
   loglike=log(probmat[startstate,endstate]);
+//  loglike=.4;
   return loglike;
 }
 }
@@ -19,10 +20,10 @@ real transprob_lpmf(int endstate, real starttime,real endtime, int startstate, i
 data{
   int<lower=1> n_states;  //number of states in the model
   int<lower=0> N; //number of observed transitions
-  vector[N] startstate;  //starting state
-  vector[N] endstate; //ending state
-  vector[N] starttime; //starting time
-  vector[N] endtime; //ending time
+  int startstate[N];  //starting state
+  int endstate[N]; //ending state
+  real starttime[N]; //starting time
+  real endtime[N]; //ending time
 }
 
 parameters{
@@ -73,7 +74,7 @@ transformed parameters{
 
 model{
   for(i in 1:N){
-  endstate[i]~transprob_lpmf(starttime[i], endtime[i], startstate[i], n_states, lambda); //this is the custom function
+  endstate[i]~transprob(starttime[i], endtime[i], startstate[i], n_states, lambda); //this is the custom function
 }
 }
 '
@@ -89,6 +90,6 @@ datalist=list(
 
 
 modfit <- stan(model_code = mcode, data = datalist,
-               iter = 200, chains = 1, thin=1,seed=1)
+               iter = 200, chains = 1, thin=10,seed=1)
 
 
